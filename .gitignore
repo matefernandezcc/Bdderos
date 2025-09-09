@@ -1,0 +1,22 @@
+# Vscode files
+.cursor/
+.vscode/
+**/.vscode/
+
+# Eclipse files
+.metadata/
+.settings/
+**/.metadata/
+**/.settings/
+
+# Cursor files
+.cursor/
+**/.cursor/
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
