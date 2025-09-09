@@ -1,56 +1,58 @@
-# TP Bases de Datos – Carga de la Tabla Maestra
+# TP Bases de Datos – Importar BDDEROS.sql (esquema BDDERO)
 
-Este repositorio contiene los scripts necesarios para trabajar con el TP de Bases de Datos. A continuación se detallan los pasos para cargar la tabla maestra con todos los datos.
+Este repositorio contiene el script `BDDEROS.sql`, que corresponde a la última versión del modelo transaccional y crea/carga el esquema `BDDERO` (nombre del grupo) según la consigna del TP 2C2025.
 
 ## Prerrequisitos
-- Tener instalado SQL Server y SQL Server Management Studio (SSMS).
-- Contar con permisos para crear bases de datos y ejecutar scripts.
-- Acceso al material del TP.
+- SQL Server 2019 (o compatible) y SQL Server Management Studio (SSMS) o `sqlcmd`.
+- Permisos para crear objetos en la base `GD2C2025`.
 
-## 1️⃣ Descargar los datos
-1. Ir a la página del TP:  
-   https://sites.google.com/site/gestiondedatosutn/trabajo-práctico?authuser=0
-2. Descargar el archivo "Trabajo Práctico" que contiene la tabla maestra y los scripts.
-
-## 2️⃣ Crear la base de datos
-1. Abrir SSMS.  
-2. Crear una nueva base de datos con el nombre:
+## 1️⃣ Crear (si es necesario) la base de datos
+En SSMS o cualquier cliente SQL, ejecutar:
 ```sql
-CREATE DATABASE GD2C2025;
+IF DB_ID('GD2C2025') IS NULL 
+    CREATE DATABASE GD2C2025;
 ```
-3. Verificar la conexión y que la base exista.
 
-## 3️⃣ Preparar el script del esquema
-1. Abrir el archivo `gd_esquema.Schema.sql`.
-2. Reemplazar la sentencia de cambio de base:
-Antes:
-```sql
-USE GD1C2025;
-```
-Después:
+## 2️⃣ Ejecutar BDDEROS.sql con SSMS
+1. Abrir SSMS y conectarse al servidor de SQL Server.
+2. Seleccionar la base `GD2C2025` en el dropdown de bases o incluir al inicio del script:
 ```sql
 USE GD2C2025;
+GO
 ```
-3. Guardar el archivo.
+3. Abrir el archivo `BDDEROS.sql` desde File > Open > File...
+4. Ejecutar el script (F5) y esperar a que finalice sin errores.
 
-## 4️⃣ Ejecutar el script de carga de la tabla maestra
-1. Abrir el archivo `generarTabla.bat` en un editor de texto.
-2. Reemplazar `{nombre_servidor_sql2022}` por el nombre de tu servidor SQL.
-3. Guardar y ejecutar el archivo `.bat`.
-4. Esperar a que la ventana de CMD se cierre automáticamente al finalizar.
+## 3️⃣ Ejecutar BDDEROS.sql con sqlcmd (alternativa por consola)
+- Autenticación SQL Server (Linux/WSL ejemplo):
+```bash
+/opt/mssql-tools/bin/sqlcmd \
+  -S localhost,1433 \
+  -U sa -P 'TU_PASSWORD' \
+  -d GD2C2025 \
+  -i BDDEROS.sql \
+  -a 32767 -b -o resultado_output.txt
+```
+- Autenticación de Windows (Windows ejemplo):
+```bash
+sqlcmd -S localhost\SQLSERVER2019 -E -d GD2C2025 -i BDDEROS.sql -a 32767 -b -o resultado_output.txt
+```
 
-## 5️⃣ Verificar la carga
-1. Abrir SSMS y conectarse a la base de datos `GD2C2025`.
-2. Ejecutar la siguiente consulta:
+## 4️⃣ Verificación post-ejecución
+Comprobar que el esquema `BDDERO` y sus tablas fueron creados:
 ```sql
-SELECT COUNT(*) 
-FROM [GD2C2025].[gd_esquema].[Maestra];
-```
-3. Resultado esperado:
-```
-240918
+-- Verificar esquema
+SELECT name FROM sys.schemas WHERE name = 'BDDERO';
+
+-- Listar tablas del esquema
+SELECT s.name AS schema_name, t.name AS table_name
+FROM sys.tables t
+JOIN sys.schemas s ON s.schema_id = t.schema_id
+WHERE s.name = 'BDDERO'
+ORDER BY t.name;
 ```
 
 ## Notas
-- Si la ejecución falla, revisa el nombre del servidor, credenciales y que la base `GD2C2025` exista.
-- Asegúrate de ejecutar los scripts con un usuario con permisos suficientes.
+- El script debe ejecutarse sin errores en SQL Server 2019.
+- Si `BDDEROS.sql` ya incluye `USE GD2C2025;`, no es necesario cambiar la base manualmente.
+- Si aparece un error de permisos, validar que el usuario tenga rol suficiente (por ejemplo, `db_ddladmin`/`db_owner`) sobre `GD2C2025`.
